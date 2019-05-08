@@ -8,15 +8,15 @@ import java.util.Scanner;
 
 import lab3.Node.Edge;
 
-public class Prim {
+public class Prim2 {
 	private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\3makingfriends\\data\\secret\\";
 
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner sc = new Scanner(new File(TESTDATA_DIR + "4huge.in"));
+		//Scanner sc = new Scanner(new File(TESTDATA_DIR + "4huge.in"));
 
-		//Scanner sc = new Scanner(System.in);
-		long startTime = System.nanoTime();   
-		PriorityQueue<Node> q = new PriorityQueue<>(
+		Scanner sc = new Scanner(System.in);
+		//long startTime = System.nanoTime();   
+		FastPriorityQueue<Node> q = new FastPriorityQueue<>(
 				(a, b) -> a.keyValue < b.keyValue ? -1 : a.keyValue == b.keyValue ? 0 : 1);
 		int n = sc.nextInt();
 		int m = sc.nextInt();
@@ -39,25 +39,23 @@ public class Prim {
 					if (weight < keyValue) {
 						nodeList[neighbor].keyValue = weight;
 						q.remove(nodeList[neighbor]);
-						q.add(nodeList[neighbor]);
+						q.offer(nodeList[neighbor]);
 					}
 				}
 			}
 			nodeList[currentVertex.idx] = null;
-			System.out.println(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
-
+			//System.out.println(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory());
 		}
 		int totalCost = 0;
 		while (!mst.isEmpty()) {
 			totalCost += mst.pop().keyValue;
 		}
 		System.out.println(totalCost);
-		long estimatedTime = System.nanoTime() - startTime;
-		System.out.println("Time elapsed: "+ Long.toString(estimatedTime/1000000)+"ms");
-
+		//long estimatedTime = System.nanoTime() - startTime;
+		//System.out.println("Time elapsed: "+ Long.toString(estimatedTime/1000000)+"ms");
 	}
 
-	public static void initialize(PriorityQueue<Node> q, Node[] nodeList, Scanner sc) {
+	public static void initialize(FastPriorityQueue<Node> q, Node[] nodeList, Scanner sc) {
 		while (sc.hasNext()) {
 			int v1 = sc.nextInt();
 			int v2 = sc.nextInt();
