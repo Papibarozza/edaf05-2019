@@ -86,8 +86,7 @@ public class FastPriorityQueue<E> extends AbstractQueue<E> {
     private void siftUp(int k, E x) {
         if (comparator != null)
             siftUpUsingComparator(k, x);
-        else throw new NullPointerException("No comparator supplied to function");
-       
+        else throw new NullPointerException("No comparator supplied to function"); 
     }
     private E removeAt(int i) {
         // assert i >= 0 && i < size;
