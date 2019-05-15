@@ -8,14 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DQ {
+public class DQ2 {
 	private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\4closestpair\\data\\secret\\";
-	// private final static String TESTDATA_DIR =
-	// "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/4closestpair/data/secret/";
+	//private final static String TESTDATA_DIR = "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/4closestpair/data/secret/";
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "2med.in"));
-		// BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		//BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "6huger.in"));
+	    BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String str;
 		int n = Integer.parseInt(in.readLine());
 		ArrayList<Point> pX = new ArrayList<>();
@@ -30,46 +29,15 @@ public class DQ {
 				e.printStackTrace();
 			}
 		}
-
-		// pX.sort((a, b) -> a.x < b.x ? -1 : a.x == b.x ? (a.y < b.y ? -1 : a.y == b.y
-		// ? 0 : 1) : 1); // Sorts on x and
-		pX.sort((a, b) -> {
-			int cmp = 0;
-			if (cmp == 0) {
-				cmp = Integer.compare(a.x, b.x);
-			}
-			if (cmp == 0) {
-				cmp = Integer.compare(a.y, b.y);
-			}
-			return cmp;
-		});
+		pX.sort((a, b) -> a.x < b.x ? -1 : a.x == b.x ? 0 : 1); // Sorts on
+																// x-coord
 		pY.sort((a, b) -> a.y < b.y ? -1 : a.y == b.y ? 0 : 1); // Sorts on
 																// y-coord
 		/*
 		 * for (Point p : pX) { System.out.println(p); }
 		 */
-
-		// System.out.println(String.format("%.6f", findMinSlower(pX)).replace(',',
-		// '.'));
-
-		long startTime = System.nanoTime();
-		System.out.println(findMin(pX, pY));
-		long endTime = System.nanoTime();
-		long timeElapsed = endTime - startTime;
-		System.out.println(
-				"Execution time for fastest DQ implementation in milliseconds : " + timeElapsed / 1000000 + "ms");
-
-		startTime = System.nanoTime();
-		System.out.println(findMinSlower(pX));
-		endTime = System.nanoTime();
-		timeElapsed = endTime - startTime;
-		System.out.println("Execution time for slower DQ method in milliseconds : " + timeElapsed / 1000000 + "ms");
-
-		startTime = System.nanoTime();
-		// System.out.println(bruteForceClosestPair(pX));
-		endTime = System.nanoTime();
-		timeElapsed = endTime - startTime;
-		System.out.println("Execution time for bruteforce method in milliseconds : " + timeElapsed / 1000000 + "ms");
+		
+		System.out.println(String.format("%.6f", findMinSlower(pX)).replace(',', '.'));
 
 	}
 
@@ -77,52 +45,37 @@ public class DQ {
 		int middleIdx = pX.size() / 2;
 		List<Point> leftX = pX.subList(0, middleIdx + 1);
 		List<Point> rightX = pX.subList(middleIdx + 1, pX.size());
-
-		Point middlePoint = pX.get(middleIdx);
-
-		List<Point> leftY = pY.stream().filter(p -> {
-			if (p.x < middlePoint.x) {
-				return true;
-			} else if (p.x == middlePoint.x) {
-				if (p.y <= middlePoint.y) {
-					return true;
-				}
-			}
-			return false;
-		}).collect(Collectors.toList());
-
-		List<Point> rightY = pY.stream().filter(p -> {
-			if (p.x > middlePoint.x) {
-				return true;
-			} else if (p.x == middlePoint.x) {
-				if (p.y > middlePoint.y) {
-					return true;
-				}
-			}
-			return false;
-		}).collect(Collectors.toList());
 		
-	
-
+		Point middlePoint = pX.get(middleIdx);
+		
+		List<Point> leftY =  pY.stream()
+		    .filter(p -> p.x <= middlePoint.x).collect(Collectors.toList());
+		List<Point> rightY =  pY.stream()
+			    .filter(p -> p.x >middlePoint.x).collect(Collectors.toList());
+		
 		double delta;
 		if (pX.size() < 5) {
 			delta = bruteForceClosestPair(pX);
 		} else {
-			delta = Math.min(findMin(leftX, leftY), findMin(rightX, rightY));
+			delta = Math.min(findMin(leftX,leftY), findMin(rightX,rightY));
 		}
 
-		List<Point> strip = pY.stream().filter(p -> p.x <= middlePoint.x + delta && p.x >= middlePoint.x - delta)
-				.collect(Collectors.toList());
+		//List<Point> strip = extractStrip1d(pX, middleIdx, delta);
+		//strip.sort((a, b) -> a.y < b.y ? -1 : a.y == b.y ? 0 : 1); // Sorts on
+																	// y-coords
+		List<Point> strip = pY.stream()
+				 .filter(p -> p.x <= middlePoint.x+delta && p.x >= middlePoint.x-delta).collect(Collectors.toList());
 		double interSetDist = findInterSetDist(strip);
 
 		return Math.min(delta, interSetDist);
 	}
-
 	private static double findMinSlower(List<Point> pX) {
 		int middleIdx = pX.size() / 2;
 		List<Point> leftX = pX.subList(0, middleIdx + 1);
 		List<Point> rightX = pX.subList(middleIdx + 1, pX.size());
 
+
+		
 		double delta;
 		if (pX.size() < 5) {
 			delta = bruteForceClosestPair(pX);
@@ -234,8 +187,8 @@ public class DQ {
 	}
 
 	/**
-	 * Returns a new subarray containing the elements from start -> end from input
-	 * array. Ex. subArr([1,2,3,4],1,2) => [2,3]
+	 * Returns a new subarray containing the elements from start -> end from
+	 * input array. Ex. subArr([1,2,3,4],1,2) => [2,3]
 	 * 
 	 */
 	public static Object[] subArray(Object[] arr, int start, int end) {
@@ -247,8 +200,8 @@ public class DQ {
 	}
 
 	/**
-	 * Returns a new subarray containing the elements from start -> end from input
-	 * array. Ex. subArr([1,2,3,4],1,2) => [2,3]
+	 * Returns a new subarray containing the elements from start -> end from
+	 * input array. Ex. subArr([1,2,3,4],1,2) => [2,3]
 	 * 
 	 */
 	public static int[] subArray(int[] arr, int start, int end) {
