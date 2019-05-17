@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DQ {
-	private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\4closestpair\\data\\secret\\";
-	// private final static String TESTDATA_DIR =
-	// "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/4closestpair/data/secret/";
+	//private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\4closestpair\\data\\secret\\";
+	private final static String TESTDATA_DIR =
+	"C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/4closestpair/data/secret/";
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "2med.in"));
+		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "5huge.in"));
 		// BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String str;
 		int n = Integer.parseInt(in.readLine());
@@ -132,7 +132,7 @@ public class DQ {
 
 		List<Point> strip = extractStrip1d(pX, middleIdx, delta);
 		strip.sort((a, b) -> a.y < b.y ? -1 : a.y == b.y ? 0 : 1); // Sorts on
-																	// y-coords
+		//System.out.println(strip.size());										// y-coords
 		double interSetDist = findInterSetDist(strip);
 
 		return Math.min(delta, interSetDist);
