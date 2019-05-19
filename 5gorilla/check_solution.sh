@@ -12,7 +12,7 @@ for f in data/**/*.in; do
     ans=$pre.ans
     verdict=$pre.verd
     $* < $f > $out
-    python3 output_validator/output_validator.py $f $out $ans > $verdict
+    python output_validator/output_validator.py $f $out $ans > $verdict
     echo Checking solution...
     if grep -Fxq "success" $verdict
     then 
