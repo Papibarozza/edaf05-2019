@@ -1,20 +1,21 @@
 package lab6;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 
 public class FordFulk {
-	//private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\6railwayplanning\\data\\secret\\";
-	 private final static String TESTDATA_DIR =
-    "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/6railwayplanning/data/secret/";
+	private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\6railwayplanning\\data\\sample\\";
+	// private final static String TESTDATA_DIR =
+	// "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/6railwayplanning/data/secret/";
 
+	@SuppressWarnings("resource")
 	public static void main(String[] args) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "0mini.in"));
+		//BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "1.in"));
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		int[] params = mapToInt(in.readLine().split("\\s+"));
 		int n = params[0];
 		int m = params[1];
@@ -47,7 +48,6 @@ public class FordFulk {
 			v.addEdge(u.id, cost);
 			nodes[u.id] = u;
 			nodes[v.id] = v;
-
 			i++;
 		}
 		int[] routes = new int[p];
@@ -56,28 +56,67 @@ public class FordFulk {
 			routes[i] = Integer.valueOf(in.readLine());
 			i++;
 		}
+
 		int src = 0;
 		int sink = n - 1;
-		int totalFlow=0;
-		//int routesToRemove = p/2;
+		/*
+		 * int totalFlow = 0; int routesToRemove = p / 2; for (int i1 = 0; i1 < p - 1;
+		 * i1++) { nodes = createGraph(connections,n); nodes = removeConnections(i1,
+		 * routes, connections, nodes); totalFlow = calculateFlows(nodes, src, sink);
+		 * System.out.println(i1 + " " + totalFlow);
+		 * 
+		 * }
+		 */
 		int l = 0;
-		int r = p-1;
-		int routesToRemove=0;
-		Node [] originalNodes = nodes.clone();
-		while (l<=r) {
-			routesToRemove = (l+r)/2;
-			nodes = originalNodes;
+		int r = p - 1;
+		int routesToRemove = 0;
+		int totalFlow = 0;
+		int lastIdxItWasGood = 0;
+		int lastFlowItWasGood = 0;
+		while (l <= r) {
+			routesToRemove = (l + r) / 2;
+			nodes = createGraph(connections, n);
 			nodes = removeConnections(routesToRemove, routes, connections, nodes);
 			totalFlow = calculateFlows(nodes, src, sink);
-			if(totalFlow>totalCapacity){
-				l = routesToRemove+1;
-			}else if(totalFlow<totalCapacity){
-				r = routesToRemove-1;
-			}else{
-				break;
+			if (totalFlow >= totalCapacity) {
+				l = routesToRemove + 1;
+				lastIdxItWasGood = routesToRemove;
+				lastFlowItWasGood = totalFlow;
+			} else if (totalFlow < totalCapacity) {
+				r = routesToRemove - 1;
 			}
 		}
-		System.out.println(routesToRemove+" "+totalFlow);
+		System.out.println(lastIdxItWasGood + " " + lastFlowItWasGood);
+
+	}
+
+	private static Node[] createGraph(int[][] connections, int size) {
+		Node[] nodes = new Node[size];
+		for (int[] connection : connections) {
+
+			int[] nodeParams = connection;
+			// System.out.println(Arrays.toString(nodeParams));
+			int uIdx = nodeParams[0];
+			int vIdx = nodeParams[1];
+			Node u;
+			Node v;
+			if (nodes[uIdx] == null) {
+				u = new Node(uIdx);
+			} else {
+				u = nodes[uIdx];
+			}
+			if (nodes[vIdx] == null) {
+				v = new Node(vIdx);
+			} else {
+				v = nodes[vIdx];
+			}
+			int cost = nodeParams[2];
+			u.addEdge(v.id, cost);
+			v.addEdge(u.id, cost);
+			nodes[u.id] = u;
+			nodes[v.id] = v;
+		}
+		return nodes;
 	}
 
 	private static int calculateFlows(Node[] nodes, int src, int sink) {
@@ -87,7 +126,7 @@ public class FordFulk {
 	}
 
 	private static Node[] removeConnections(int nmbrOfroutes, int[] routes, int[][] connections, Node[] nodes) {
-		for (int i = 0; i <= nmbrOfroutes; i++) {
+		for (int i = 0; i <= nmbrOfroutes - 1; i++) {
 			int[] connection = connections[routes[i]];
 			nodes = removeConnection(connection[0], connection[1], nodes);
 		}
@@ -162,8 +201,8 @@ public class FordFulk {
 	}
 
 	/*
-	 * private static int findDelta(Path path) { while (path.prev != null) {
-	 * path = path.prev; } }
+	 * private static int findDelta(Path path) { while (path.prev != null) { path =
+	 * path.prev; } }
 	 */
 
 	private static Node[] removeConnection(int u, int v, Node[] nodes) {
