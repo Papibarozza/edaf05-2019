@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class FordFulk {
-	private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\6railwayplanning\\data\\secret\\";
-	// private final static String TESTDATA_DIR =
-	// "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/6railwayplanning/data/secret/";
+	//private final static String TESTDATA_DIR = "C:\\Users\\Arvid Mildner\\Documents\\edaf05-workspace-2019\\edaf05\\6railwayplanning\\data\\secret\\";
+	 private final static String TESTDATA_DIR =
+    "C:/Users/Arvid/Documents/edaf05-projects/edaf05-2019/6railwayplanning/data/secret/";
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "3large.in"));
+		BufferedReader in = new BufferedReader(new FileReader(TESTDATA_DIR + "0mini.in"));
 		int[] params = mapToInt(in.readLine().split("\\s+"));
 		int n = params[0];
 		int m = params[1];
@@ -27,7 +27,7 @@ public class FordFulk {
 		while (i < m) {
 			int[] nodeParams = mapToInt(in.readLine().split("\\s"));
 			connections[i] = nodeParams;
-			//System.out.println(Arrays.toString(nodeParams));
+			// System.out.println(Arrays.toString(nodeParams));
 			int uIdx = nodeParams[0];
 			int vIdx = nodeParams[1];
 			Node u;
@@ -50,36 +50,48 @@ public class FordFulk {
 
 			i++;
 		}
-		int[] removes = new int[p];
+		int[] routes = new int[p];
 		i = 0;
 		while (i < p) {
-			removes[i] = Integer.valueOf(in.readLine());
+			routes[i] = Integer.valueOf(in.readLine());
 			i++;
 		}
 		int src = 0;
-		int sink = n-1;
-		int routesRemoved = 0;
-		int oldFlow = 0;
-		int ij = 0;
-		for(int route : removes) {
-			int [] connection = connections[route]; //Get the route to remove
-			nodes = resetFlows(nodes);
-			nodes = removeConnection(connection[0],connection[1],nodes);
-			
-			fordFulkerson(src, sink, nodes);
-			int totalFlow = totalFlow(nodes, sink);
-		
-			if(totalFlow<totalCapacity) {
-				System.out.println(routesRemoved+" "+oldFlow); //The amount of routes removed before we got too low flow,
-				//And that old flow;
+		int sink = n - 1;
+		int totalFlow=0;
+		//int routesToRemove = p/2;
+		int l = 0;
+		int r = p-1;
+		int routesToRemove=0;
+		Node [] originalNodes = nodes.clone();
+		while (l<=r) {
+			routesToRemove = (l+r)/2;
+			nodes = originalNodes;
+			nodes = removeConnections(routesToRemove, routes, connections, nodes);
+			totalFlow = calculateFlows(nodes, src, sink);
+			if(totalFlow>totalCapacity){
+				l = routesToRemove+1;
+			}else if(totalFlow<totalCapacity){
+				r = routesToRemove-1;
+			}else{
 				break;
 			}
-			oldFlow = totalFlow;
-			routesRemoved++;
-			System.out.println(ij++);
 		}
+		System.out.println(routesToRemove+" "+totalFlow);
+	}
 
+	private static int calculateFlows(Node[] nodes, int src, int sink) {
+		nodes = resetFlows(nodes);
+		fordFulkerson(src, sink, nodes);
+		return totalFlow(nodes, sink);
+	}
 
+	private static Node[] removeConnections(int nmbrOfroutes, int[] routes, int[][] connections, Node[] nodes) {
+		for (int i = 0; i <= nmbrOfroutes; i++) {
+			int[] connection = connections[routes[i]];
+			nodes = removeConnection(connection[0], connection[1], nodes);
+		}
+		return nodes;
 	}
 
 	private static Node[] resetFlows(Node[] nodes) {
@@ -92,11 +104,11 @@ public class FordFulk {
 	private static int totalFlow(Node[] nodes, int sinkID) {
 		int totalFlow = 0;
 		for (Node n1 : nodes) {
-			if(n1.id!= sinkID) {
-				for (Node.Edge edge : n1.edges) {	
+			if (n1.id != sinkID) {
+				for (Node.Edge edge : n1.edges) {
 					totalFlow += edge.flow;
-					
-				}				
+
+				}
 			}
 		}
 		return totalFlow;
@@ -125,10 +137,18 @@ public class FordFulk {
 		while (path.prev != null) {
 			Node prevNode = nodes[path.prev.node.id];
 			for (Node.Edge e : prevNode.edges) {
-				if (e.endPoint == path.node.id) { // If current edge connects along this path, increase it.
+				if (e.endPoint == path.node.id) { // If current edge connects
+													// along this path, increase
+													// it.
 					e.flow = e.flow + delta;
-					for (Node.Edge backwardsEdge : nodes[path.node.id].edges) { // Find backwards path and decrease by
-																				// same amount.
+					for (Node.Edge backwardsEdge : nodes[path.node.id].edges) { // Find
+																				// backwards
+																				// path
+																				// and
+																				// decrease
+																				// by
+																				// same
+																				// amount.
 						if (backwardsEdge.endPoint == e.startPoint) {
 							backwardsEdge.flow = backwardsEdge.flow - delta;
 							break;
@@ -142,8 +162,8 @@ public class FordFulk {
 	}
 
 	/*
-	 * private static int findDelta(Path path) { while (path.prev != null) { path =
-	 * path.prev; } }
+	 * private static int findDelta(Path path) { while (path.prev != null) {
+	 * path = path.prev; } }
 	 */
 
 	private static Node[] removeConnection(int u, int v, Node[] nodes) {
@@ -169,7 +189,7 @@ public class FordFulk {
 					if (edge.endPoint == v) {
 						return newPath; // Found the path
 					} else {
-						q.push(newPath); //DFS
+						q.push(newPath); // DFS
 					}
 				}
 
@@ -191,28 +211,29 @@ public class FordFulk {
 	private static class Path {
 		Path prev;
 		Node node;
-		
 
 		Path(Node n, Path prev) {
 			this.node = n;
 			this.prev = prev;
 		}
+
 		public boolean isCycle() {
-			if(prev==null) {
+			if (prev == null) {
 				return false;
-			}else {
+			} else {
 				return prev.isCycleRecursive(node.id);
 			}
 		}
+
 		private boolean isCycleRecursive(int id) {
-			if(id == this.node.id) {
+			if (id == this.node.id) {
 				return true;
 			}
-			if(prev == null) {
+			if (prev == null) {
 				return false;
 			}
 			return prev.isCycleRecursive(id);
-			
+
 		}
 	}
 
@@ -228,7 +249,7 @@ public class FordFulk {
 			for (Node.Edge e : edges) {
 				e.flow = 0;
 			}
-			
+
 		}
 
 		public void removeEdge(int v) {
